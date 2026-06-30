@@ -31,3 +31,21 @@ Validaciones realizadas:
 - SSH correcto.
 - Hostname correcto.
 - QEMU Guest Agent correcto.
+
+## Corrección de Machine ID
+
+Durante la validación de la VM `rocky9-admin-01`, se detectó que el `machine-id` había sido heredado desde el template original.
+
+Se corrigió generando un nuevo identificador único dentro de la VM:
+
+    sudo cp /etc/machine-id /etc/machine-id.bak
+    sudo truncate -s 0 /etc/machine-id
+    sudo systemd-machine-id-setup
+
+Validación:
+
+    hostnamectl
+
+Resultado:
+
+    La VM `rocky9-admin-01` ahora tiene un Machine ID único.
