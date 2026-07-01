@@ -2,7 +2,7 @@
 
 set -e
 
-TEMPLATE_ID=200
+TEMPLATE_ID=202
 
 if [ "$#" -ne 2 ]; then
     echo "Uso: $0 <vmid> <nombre-vm>"
