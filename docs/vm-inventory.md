@@ -12,17 +12,17 @@ Inventario inicial de máquinas virtuales del laboratorio Proxmox.
 
 | VMID | Nombre | IP | Sistema | Estado | Rol |
 |---|---|---|---|---|---|
-| 210 | rocky9-admin-01 | 192.168.0.195 | Rocky Linux 9 | Running | VM administrativa inicial |
+| 201 | admin-01 | 192.168.0.201 | Rocky Linux 9 | Running | VM administrativa inicial |
 
 ## Notas
 
-La VM `rocky9-admin-01` fue creada usando el script:
+La VM `admin-01` fue creada usando el script:
 
     scripts/clone-rocky9-vm.sh
 
 Comando utilizado:
 
-    ./scripts/clone-rocky9-vm.sh 210 rocky9-admin-01
+    ./scripts/clone-rocky9-vm.sh 201 admin-01
 
 Validaciones realizadas:
 
