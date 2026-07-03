@@ -1,0 +1,31 @@
+---
+- name: Validate managed host
+  hosts: admin
+  gather_facts: true
+
+  tasks:
+    - name: Show hostname
+      ansible.builtin.debug:
+        msg: "Host: {{ ansible_hostname }}"
+
+    - name: Show OS version
+      ansible.builtin.debug:
+        msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Show current Ansible user
+      ansible.builtin.command: whoami
+      register: whoami_result
+      changed_when: false
+
+    - name: Print current Ansible user
+      ansible.builtin.debug:
+        msg: "User: {{ whoami_result.stdout }}"
+
+    - name: Show uptime
+      ansible.builtin.command: uptime
+      register: uptime_result
+      changed_when: false
+
+    - name: Print uptime
+      ansible.builtin.debug:
+        msg: "{{ uptime_result.stdout }}"
