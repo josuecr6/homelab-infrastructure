@@ -5,9 +5,16 @@
   gather_facts: true
 
   tasks:
+    - name: Ensure host is Rocky Linux
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Rocky"
+        fail_msg: "This playbook only supports Rocky Linux hosts."
+        success_msg: "Rocky Linux host confirmed."
+
     - name: Show target host information
       ansible.builtin.debug:
-        msg: 
+        msg:
           - "Host: {{ ansible_hostname }}"
           - "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
           - "User: {{ ansible_user }}"
@@ -25,3 +32,15 @@
           - openssh-clients
           - bash-completion
         state: present
+
+    - name: Ensure chrony is enabled and running
+      ansible.builtin.service:
+        name: chronyd
+        enabled: true
+        state: started
+
+    - name: Ensure qemu guest agent is enabled and running
+      ansible.builtin.service:
+        name: qemu-guest-agent
+        enabled: true
+        state: started
