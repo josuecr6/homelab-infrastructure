@@ -1,0 +1,29 @@
+---
+- name: Apply base user configuration to hosts
+  hosts: admin
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Ensure user jocufe exists
+      ansible.builtin.user:
+        name: "jocufe"
+        groups: "wheel"
+        append: true
+        shell: /bin/bash
+        state: present
+        create_home: true
+      
+    - name: Secure ssh file
+      ansible.builtin.file:
+        path: /home/jocufe/.ssh
+        owner: jocufe
+        group: jocufe
+        mode: '0700'
+        state: directory
+   
+    - name: Add public key
+      ansible.posix.authorized_key:
+        user: jocufe
+        state: present
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKZsfF11QzUD5vliMp4j5klxRjPOVEzb797KsJ3qkSNH ansible admin-01 local"
