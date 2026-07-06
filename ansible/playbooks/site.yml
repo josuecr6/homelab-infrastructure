@@ -1,0 +1,4 @@
+---
+- import_playbook: base-rocky.yml
+- import_playbook: users.yml
+- import_playbook: ssh-hardening.yml
