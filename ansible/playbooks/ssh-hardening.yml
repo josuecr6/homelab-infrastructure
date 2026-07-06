@@ -12,7 +12,7 @@
         group: root
         mode: '0644'
         content: |
-          PermitRootLogin {{ ssh_permit_root_login }}
+          #PermitRootLogin {{ ssh_permit_root_login }}
           PubkeyAuthentication {{ ssh_pubkey_authentication }}
           PasswordAuthentication {{ ssh_password_authentication }}
       notify: Reload sshd
