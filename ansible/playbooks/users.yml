@@ -7,32 +7,32 @@
   tasks:
     - name: Ensure user jocufe exists
       ansible.builtin.user:
-        name: "jocufe"
-        groups: "wheel"
+        name: "{{ admin_user }}"
+        groups: "{{ admin_user_groups }}"
         append: true
-        shell: /bin/bash
+        shell: "{{ admin_user_shell }}"
         state: present
         create_home: true
       
     - name: Secure ssh file
       ansible.builtin.file:
-        path: /home/jocufe/.ssh
-        owner: jocufe
-        group: jocufe
+        path: "/home/{{ admin_user }}/.ssh"
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
         mode: '0700'
         state: directory
    
     - name: Add public key
       ansible.posix.authorized_key:
-        user: jocufe
+        user: "{{ admin_user }}"
         state: present
-        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKZsfF11QzUD5vliMp4j5klxRjPOVEzb797KsJ3qkSNH ansible admin-01 local"
+        key: "{{ admin_ssh_public_key }}"
 
     - name: Ensure sudoers file for jocufe exists
       ansible.builtin.copy:
-        dest: /etc/sudoers.d/jocufe
+        dest: "/etc/sudoers.d/{{ admin_user }}"
         owner: root
         group: root
         mode: '0440'
-        content: "jocufe ALL=(ALL) ALL\n"
+        content: "{{ admin_user }} ALL=(ALL) ALL\n"
         validate: /usr/sbin/visudo -cf %s
