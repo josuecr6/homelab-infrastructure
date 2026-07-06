@@ -27,3 +27,12 @@
         user: jocufe
         state: present
         key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKZsfF11QzUD5vliMp4j5klxRjPOVEzb797KsJ3qkSNH ansible admin-01 local"
+
+    - name: Ensure sudoers file for jocufe exists
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/jocufe
+        owner: root
+        group: root
+        mode: '0440'
+        content: "jocufe ALL=(ALL) ALL\n"
+        validate: /usr/sbin/visudo -cf %s
