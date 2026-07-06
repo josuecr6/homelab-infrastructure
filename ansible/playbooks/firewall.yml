@@ -1,0 +1,34 @@
+---
+- name: Configure basic firewall
+  hosts: admin
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Install firewalld
+      ansible.builtin.dnf:
+        name: firewalld
+        state: present
+      tags:
+        - firewall
+        - packages
+
+    - name: Enable and start firewalld
+      ansible.builtin.service:
+        name: firewalld
+        enabled: true
+        state: started
+      tags:
+        - firewall
+        - services
+
+    - name: Allow configured firewall services
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: enabled
+      loop: "{{ firewall_allowed_services }}"
+      tags:
+        - firewall
+        - firewall_rules

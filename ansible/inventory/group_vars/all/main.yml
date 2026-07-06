@@ -9,3 +9,7 @@ admin_ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKZsfF11QzUD5vliMp4j5
 ssh_permit_root_login: "no"
 ssh_pubkey_authentication: "yes"
 ssh_password_authentication: "no"
+
+# Firewall variables
+firewall_allowed_services:
+  - ssh
