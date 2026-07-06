@@ -3,3 +3,4 @@
 - import_playbook: users.yml
 - import_playbook: ssh-hardening.yml
 - import_playbook: firewall.yml
+- import_playbook: system-update.yml
