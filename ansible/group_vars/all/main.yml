@@ -4,3 +4,8 @@ admin_user_groups:
   - wheel
 admin_user_shell: /bin/bash
 admin_ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKZsfF11QzUD5vliMp4j5klxRjPOVEzb797KsJ3qkSNH ansible admin-01 local"
+
+# SSH variables
+ssh_permit_root_login: "no"
+ssh_pubkey_authentication: "yes"
+ssh_password_authentication: "yes"
