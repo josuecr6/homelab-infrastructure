@@ -1,0 +1,57 @@
+---
+- name: Validate target OS is Rocky Linux
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Rocky"
+    fail_msg: "This playbook is intended for Rocky Linux systems only."
+    success_msg: "Target OS is Rocky Linux."
+  tags:
+    - base
+    - validation
+
+- name: Show target host information
+  ansible.builtin.debug:
+    msg:
+      - "Host: {{ ansible_hostname }}"
+      - "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+      - "User: {{ ansible_user }}"
+  tags:
+    - base
+    - info
+
+- name: Install base packages
+  ansible.builtin.dnf:
+    name:
+      - git
+      - vim-enhanced
+      - tree
+      - wget
+      - curl
+      - rsync
+      - python3
+      - openssh-clients
+      - bash-completion
+    state: present
+  tags:
+    - base
+    - packages
+
+- name: Enable and start chronyd
+  ansible.builtin.service:
+    name: chronyd
+    enabled: true
+    state: started
+  tags:
+    - base
+    - services
+    - chrony
+
+- name: Enable and start qemu-guest-agent
+  ansible.builtin.service:
+    name: qemu-guest-agent
+    enabled: true
+    state: started
+  tags:
+    - base
+    - services
+    - qemu
