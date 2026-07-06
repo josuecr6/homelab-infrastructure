@@ -1,0 +1,31 @@
+---
+- name: Apply basic SSH hardening
+  hosts: admin
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Ensure SSH hardening config exists
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/99-homelab.conf
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          PermitRootLogin no
+          PubkeyAuthentication yes
+          PasswordAuthentication yes
+      notify: Reload sshd
+        # validate: /usr/sbin/sshd -t -f %s
+  
+  handlers:
+    - name: Validate sshd configuration
+      ansible.builtin.command: /usr/sbin/sshd -t
+      changed_when: false
+      listen: Reload sshd
+      notify: Reload sshd service
+
+    - name: Reload sshd service
+      ansible.builtin.service:
+        name: sshd
+        state: reloaded
