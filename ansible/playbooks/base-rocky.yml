@@ -11,6 +11,9 @@
           - ansible_distribution == "Rocky"
         fail_msg: "This playbook only supports Rocky Linux hosts."
         success_msg: "Rocky Linux host confirmed."
+      tags:
+        - base
+        - validation
 
     - name: Show target host information
       ansible.builtin.debug:
@@ -18,6 +21,9 @@
           - "Host: {{ ansible_hostname }}"
           - "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
           - "User: {{ ansible_user }}"
+      tags:
+        - base
+        - info
 
     - name: Ensure base packages are installed
       ansible.builtin.dnf:
@@ -32,15 +38,26 @@
           - openssh-clients
           - bash-completion
         state: present
+      tags:
+        - base
+        - packages
 
     - name: Ensure chrony is enabled and running
       ansible.builtin.service:
         name: chronyd
         enabled: true
         state: started
+      tags:
+        - base
+        - services
+        - chrony
 
     - name: Ensure qemu guest agent is enabled and running
       ansible.builtin.service:
         name: qemu-guest-agent
         enabled: true
         state: started
+      tags:
+        - base
+        - services
+        - qemu
