@@ -4,47 +4,5 @@
   become: true
   gather_facts: true
 
-  tasks:
-    - name: Ensure admin user exists
-      ansible.builtin.user:
-        name: "{{ admin_user }}"
-        groups: "{{ admin_user_groups }}"
-        append: true
-        shell: "{{ admin_user_shell }}"
-        state: present
-        create_home: true
-      tags:
-        - users
-        - accounts
-
-    - name: Secure SSH directory
-      ansible.builtin.file:
-        path: "/home/{{ admin_user }}/.ssh"
-        owner: "{{ admin_user }}"
-        group: "{{ admin_user }}"
-        mode: '0700'
-        state: directory
-      tags:
-        - users
-        - ssh_keys
-
-    - name: Add public key
-      ansible.posix.authorized_key:
-        user: "{{ admin_user }}"
-        state: present
-        key: "{{ admin_ssh_public_key }}"
-      tags:
-        - users
-        - ssh_keys
-
-    - name: Ensure sudoers file for admin user exists
-      ansible.builtin.copy:
-        dest: "/etc/sudoers.d/{{ admin_user }}"
-        owner: root
-        group: root
-        mode: '0440'
-        content: "{{ admin_user }} ALL=(ALL) ALL\n"
-        validate: /usr/sbin/visudo -cf %s
-      tags:
-        - users
-        - sudoers
+  roles:
+    - users
