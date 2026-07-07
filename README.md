@@ -1,14 +1,30 @@
 # Homelab Infrastructure
 
-Laboratorio personal de infraestructura local/híbrida usando Proxmox VE, Cloud-Init, GitHub, Ansible y Microsoft Azure.
+Repositorio de infraestructura para un laboratorio local/híbrido basado en Proxmox VE, Rocky Linux, Cloud-Init, Ansible, GitHub y Microsoft Azure.
 
-El objetivo del proyecto es construir una nube privada local sobre Proxmox VE y conectarla progresivamente con servicios de nube pública en Azure, aplicando prácticas de infraestructura como código, automatización, documentación técnica y administración segura.
+El objetivo del proyecto es construir una base de infraestructura reproducible para crear, configurar, documentar y administrar servidores del homelab de forma ordenada y progresiva.
 
 ---
 
-## Roadmap del proyecto
+## Objetivo del proyecto
 
-El proyecto sigue este path general:
+Este proyecto busca implementar una nube privada local sobre Proxmox VE y extenderla progresivamente hacia servicios de nube pública en Azure.
+
+El enfoque principal es aprender y aplicar prácticas de:
+
+- virtualización;
+- infraestructura como código;
+- automatización con Ansible;
+- administración segura de servidores Linux;
+- documentación técnica;
+- control de versiones con Git;
+- integración futura con servicios cloud.
+
+---
+
+## Roadmap general
+
+El proyecto sigue este camino de trabajo:
 
 ```text
 Fase 1 — Proxmox / Cloud-Init / templates
@@ -19,51 +35,10 @@ Fase 5 — Red híbrida con Azure
 Fase 6 — Backups híbridos
 ```
 
----
-
-## Estado actual
-
-La base inicial de Ansible quedó completada.
+El estado detallado de cada fase se mantiene en:
 
 ```text
-Fase 3 — Automatización local con Ansible
-Estado: base inicial completada
-```
-
-Se completó:
-
-```text
-Estructura Ansible limpia
-Inventario funcional
-Roles base creados
-Documentación Ansible creada
-Validaciones compactas correctas
-Ejecución de site.yml aplicada correctamente
-```
-
-El siguiente paso inmediato es registrar los cambios en Git.
-
-Después de guardar este cierre, el proyecto debe volver a:
-
-```text
-Fase 1C — Template Rocky Linux 9 con Cloud-Init
-```
-
-para cerrar y validar completamente la plantilla, QEMU Guest Agent y clonación de VMs.
-
----
-
-## Estado por fases
-
-```text
-Fase 1A — Proxmox base                   avanzada
-Fase 1B — admin-01                       avanzada
-Fase 1C — Template Rocky Cloud-Init      pendiente de cerrar
-Fase 2  — GitHub / repositorio           pendiente de formalizar
-Fase 3  — Ansible base                   completada en base inicial
-Fase 4  — Monitoreo                      pendiente
-Fase 5  — Red híbrida Azure              pendiente
-Fase 6  — Backups Azure                  pendiente
+docs/status.md
 ```
 
 ---
@@ -73,96 +48,42 @@ Fase 6  — Backups Azure                  pendiente
 ```text
 homelab-infrastructure/
 ├── ansible/
-│   ├── ansible.cfg
-│   ├── inventory/
-│   │   ├── hosts.ini
-│   │   └── group_vars/
-│   │       └── all/
-│   │           └── main.yml
-│   ├── playbooks/
-│   │   ├── base-rocky.yml
-│   │   ├── check-host.yml
-│   │   ├── firewall.yml
-│   │   ├── site.yml
-│   │   ├── ssh-hardening.yml
-│   │   ├── system-update.yml
-│   │   └── users.yml
-│   └── roles/
-│       ├── base/
-│       ├── firewall/
-│       ├── ssh_hardening/
-│       ├── system_update/
-│       └── users/
 ├── cloud-init/
 ├── diagrams/
 ├── docs/
-│   ├── ansible/
-│   │   ├── admin-01.md
-│   │   ├── ansible-roles.md
-│   │   └── security-hardening.md
-│   ├── build-rocky9-cloud-template.md
-│   ├── rocky9-cloud-template.md
-│   ├── status.md
-│   └── vm-inventory.md
 ├── scripts/
-│   └── clone-rocky9-vm.sh
 └── README.md
 ```
 
----
-
-## Nodo administrador
-
-El nodo administrador actual es:
+Descripción general:
 
 ```text
-admin-01
-```
-
-Función:
-
-```text
-Servidor desde donde se ejecuta Ansible y se administra la configuración base del homelab.
-```
-
-Usuario administrativo:
-
-```text
-jocufe
-```
-
-Repositorio local:
-
-```text
-~/homelab/homelab-infrastructure
+ansible/      Automatización y configuración de hosts Linux
+cloud-init/   Archivos relacionados con inicialización de VMs
+diagrams/     Diagramas de arquitectura del laboratorio
+docs/         Documentación técnica del proyecto
+scripts/      Scripts auxiliares para tareas operativas
+README.md     Entrada principal del repositorio
 ```
 
 ---
 
 ## Ansible
 
-La automatización local se encuentra en:
+La configuración Ansible se encuentra en:
 
 ```text
 ansible/
 ```
 
-El archivo principal de configuración es:
+Estructura principal:
 
 ```text
-ansible/ansible.cfg
-```
-
-El inventario principal es:
-
-```text
-ansible/inventory/hosts.ini
-```
-
-Las variables globales están en:
-
-```text
-ansible/inventory/group_vars/all/main.yml
+ansible/
+├── ansible.cfg
+├── inventory/
+├── playbooks/
+└── roles/
 ```
 
 El playbook principal es:
@@ -171,75 +92,16 @@ El playbook principal es:
 ansible/playbooks/site.yml
 ```
 
----
-
-## Roles Ansible actuales
-
-```text
-base
-users
-ssh_hardening
-firewall
-system_update
-```
-
-Responsabilidades generales:
-
-```text
-base             Configuración base de Rocky Linux
-users            Usuario administrativo, llave SSH y sudoers
-ssh_hardening    Endurecimiento básico de SSH
-firewall         firewalld y servicios permitidos
-system_update    Actualización de paquetes del sistema
-```
-
----
-
-## Comandos principales de Ansible
-
-Entrar al directorio de Ansible:
+Ejecución general desde `admin-01`:
 
 ```bash
 cd ~/homelab/homelab-infrastructure/ansible
-```
-
-Validar configuración usada por Ansible:
-
-```bash
-ansible --version | grep "config file"
-```
-
-Validar sintaxis:
-
-```bash
-ansible-playbook playbooks/site.yml --syntax-check
-```
-
-Listar tareas:
-
-```bash
-ansible-playbook playbooks/site.yml --list-tasks
-```
-
-Ejecutar configuración completa:
-
-```bash
 ansible-playbook playbooks/site.yml -K
 ```
 
 `-K` usa **K MAYÚSCULA** y solicita la contraseña de `sudo` / `become`.
 
----
-
-## Documentación
-
-Estado general del proyecto:
-
-```text
-docs/status.md
-```
-
-Documentación Ansible:
+Documentación relacionada:
 
 ```text
 docs/ansible/admin-01.md
@@ -247,7 +109,35 @@ docs/ansible/ansible-roles.md
 docs/ansible/security-hardening.md
 ```
 
-Documentación Proxmox / Rocky Cloud Template:
+---
+
+## Nodo administrador
+
+El nodo administrador actual del laboratorio es:
+
+```text
+admin-01
+```
+
+Este servidor se usa para:
+
+- ejecutar Ansible;
+- administrar inventarios;
+- aplicar playbooks;
+- mantener documentación operativa;
+- gestionar tareas futuras de automatización.
+
+Usuario administrativo principal:
+
+```text
+jocufe
+```
+
+---
+
+## Proxmox y Cloud-Init
+
+La documentación relacionada con la creación de templates Rocky Linux 9 y Cloud-Init se encuentra en:
 
 ```text
 docs/build-rocky9-cloud-template.md
@@ -255,59 +145,71 @@ docs/rocky9-cloud-template.md
 docs/vm-inventory.md
 ```
 
----
-
-## Template Rocky Linux 9
-
-La documentación del template Rocky Linux 9 se mantiene en:
+Los archivos específicos de Cloud-Init deben mantenerse en:
 
 ```text
-docs/build-rocky9-cloud-template.md
-docs/rocky9-cloud-template.md
-```
-
-Esta parte pertenece a:
-
-```text
-Fase 1 — Proxmox / Cloud-Init / templates
-```
-
-Pendiente de cerrar en la siguiente etapa:
-
-```text
-Cloud-Init funcionando de forma repetible
-usuario jocufe configurado
-llave SSH funcionando
-DHCP funcionando
-QEMU Guest Agent funcionando
-clonado de VMs probado
-documentación actualizada
+cloud-init/
 ```
 
 ---
 
 ## Scripts
 
-Actualmente existe:
+Los scripts auxiliares del proyecto se almacenan en:
+
+```text
+scripts/
+```
+
+Actualmente existe un script relacionado con la clonación de VMs Rocky Linux 9:
 
 ```text
 scripts/clone-rocky9-vm.sh
 ```
 
-Este script pertenece al bloque de creación/clonado de VMs desde template y será revisado cuando se retome la fase del template Rocky Cloud-Init.
+---
+
+## Documentación
+
+Documentos principales:
+
+```text
+docs/status.md
+docs/vm-inventory.md
+docs/build-rocky9-cloud-template.md
+docs/rocky9-cloud-template.md
+```
+
+Documentación de Ansible:
+
+```text
+docs/ansible/admin-01.md
+docs/ansible/ansible-roles.md
+docs/ansible/security-hardening.md
+```
 
 ---
 
-## Fuera del alcance inmediato
+## Estado del proyecto
 
-No abrir todavía:
+El estado detallado del proyecto, la fase actual y el próximo paso recomendado se documentan en:
 
 ```text
-Monitoreo con Prometheus/Grafana
-Red híbrida con Azure
-Backups híbridos hacia Azure
-Hardening avanzado
-Automatización avanzada de VMs
+docs/status.md
 ```
 
-El proyecto debe avanzar por fases y evitar agregar mejoras no solicitadas.
+El README solo mantiene una descripción general del repositorio y sus puntos de entrada principales.
+
+---
+
+## Alcance inmediato
+
+El proyecto debe avanzar por fases.
+
+No se deben abrir nuevas áreas como monitoreo, red híbrida o backups hasta cerrar los bloques anteriores correspondientes.
+
+Las decisiones de avance, pendientes y próximos pasos deben quedar documentadas en:
+
+```text
+docs/status.md
+```
