@@ -1,0 +1,15 @@
+---
+- name: Configure SSH hardening drop-in
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/99-homelab.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      PermitRootLogin {{ ssh_permit_root_login }}
+      PubkeyAuthentication {{ ssh_pubkey_authentication }}
+      PasswordAuthentication {{ ssh_password_authentication }}
+  notify: Reload sshd
+  tags:
+    - ssh
+    - ssh_hardening
