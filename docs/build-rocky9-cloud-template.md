@@ -63,7 +63,7 @@ El comando anterior crea un disco en `local-lvm`, normalmente con un nombre como
 
     qm set 200 \
       --scsihw virtio-scsi-single \
-      --scsi0 local-lvm:vm-220-disk-0 \
+      --scsi0 local-lvm:vm-200-disk-0 \
       --ide2 local-lvm:cloudinit \
       --boot order=scsi0
 
@@ -84,7 +84,7 @@ El comando anterior crea un disco en `local-lvm`, normalmente con un nombre como
 
 ## Paso 7 - Obtener IP desde Proxmox
 
-    qm guest cmd 220 network-get-interfaces
+    qm guest cmd 200 network-get-interfaces
 
 Buscar la dirección IPv4 asignada a la interfaz `eth0`.
 
@@ -102,7 +102,7 @@ Dentro de la VM:
 
 Desde Proxmox:
 
-    qm agent 220 ping
+    qm agent 200 ping
 
 Resultado esperado:
 
@@ -110,7 +110,7 @@ Resultado esperado:
 
 También se puede validar con:
 
-    qm guest cmd 220 network-get-interfaces
+    qm guest cmd 200 network-get-interfaces
 
 ## Paso 11 - Limpiar Machine ID
 

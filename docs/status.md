@@ -25,10 +25,10 @@ Fase 6 — Backups híbridos
 
 ```text
 Fase 1A — Proxmox base                   avanzada
-Fase 1B — admin-01                       avanzada
-Fase 1C — Template Rocky Cloud-Init      pendiente de cerrar
-Fase 2  — GitHub / repositorio           pendiente de formalizar
-Fase 3  — Ansible base                   fase actual
+Fase 1B — admin-01                       completada en base inicial
+Fase 1C — Template Rocky Cloud-Init      fase actual
+Fase 2  — GitHub / repositorio           iniciado, pendiente de formalizar completamente
+Fase 3  — Ansible base                   completada en base inicial
 Fase 4  — Monitoreo                      pendiente
 Fase 5  — Red híbrida Azure              pendiente
 Fase 6  — Backups Azure                  pendiente
@@ -41,10 +41,29 @@ Fase 6  — Backups Azure                  pendiente
 La fase actual del proyecto es:
 
 ```text
-Fase 3 — Automatización local con Ansible
+Fase 1C — Template Rocky Linux 9 con Cloud-Init
 ```
 
-El objetivo de esta fase es dejar una base Ansible simple, funcional, documentada y repetible para administrar servidores Linux del laboratorio desde `admin-01`.
+El objetivo de esta fase es dejar validada y documentada la plantilla oficial Rocky Linux 9 para crear nuevas VMs de forma repetible desde Proxmox.
+
+---
+
+## Template oficial
+
+El template oficial actual es:
+
+```text
+VMID: 200
+Nombre: rocky9-cloud-template
+Sistema operativo: Rocky Linux 9
+Tipo: Proxmox Template
+Cloud-Init: habilitado
+QEMU Guest Agent: habilitado
+Red: DHCP sobre vmbr0
+Usuario Cloud-Init: jocufe
+```
+
+Este template es la base para clonar nuevas VMs Rocky Linux 9 del laboratorio.
 
 ---
 
@@ -78,68 +97,52 @@ El repositorio local del proyecto se encuentra en:
 ~/homelab/homelab-infrastructure
 ```
 
-La estructura principal actual incluye:
+Estructura principal actual:
 
 ```text
 homelab-infrastructure/
 ├── ansible/
+├── cloud-init/
+├── diagrams/
 ├── docs/
+├── scripts/
 └── README.md
 ```
 
-La estructura Ansible principal es:
-
-```text
-ansible/
-├── ansible.cfg
-├── inventory/
-├── playbooks/
-└── roles/
-```
-
 ---
 
-## Documentación completada
+## Ansible
 
-Documentación Ansible completada:
+La base inicial de Ansible ya fue completada.
 
-```text
-docs/ansible/admin-01.md
-docs/ansible/ansible-roles.md
-docs/ansible/security-hardening.md
-```
-
-Documentación relacionada con Proxmox / Rocky Cloud Template existente:
+Se completó:
 
 ```text
-docs/build-rocky9-cloud-template.md
-docs/rocky9-cloud-template.md
-docs/vm-inventory.md
+estructura Ansible limpia
+inventario funcional
+roles base creados
+documentación Ansible creada
+validaciones compactas correctas
+ejecución de site.yml aplicada correctamente
+commit de cierre realizado
 ```
 
----
-
-## Playbook principal
-
-El punto de entrada principal de Ansible es:
+Playbook principal:
 
 ```text
 ansible/playbooks/site.yml
 ```
 
-Ejecución desde el directorio `ansible/`:
+Ejecución general:
 
 ```bash
+cd ~/homelab/homelab-infrastructure/ansible
 ansible-playbook playbooks/site.yml -K
 ```
 
 `-K` usa **K MAYÚSCULA** y solicita la contraseña de `sudo` / `become`.
 
----
-
-## Roles actuales
-
-Roles Ansible actuales:
+Roles actuales:
 
 ```text
 base
@@ -149,67 +152,90 @@ firewall
 system_update
 ```
 
-Responsabilidades generales:
+Documentación Ansible:
 
 ```text
-base             Configuración base de Rocky Linux
-users            Usuario administrativo, SSH key y sudoers
-ssh_hardening    Endurecimiento básico de SSH
-firewall         firewalld y servicios permitidos
-system_update    Actualización de paquetes del sistema
+docs/ansible/admin-01.md
+docs/ansible/ansible-roles.md
+docs/ansible/security-hardening.md
 ```
+
+---
+
+## Proxmox / Cloud-Init
+
+Documentación relacionada con el template Rocky Linux 9:
+
+```text
+docs/build-rocky9-cloud-template.md
+docs/rocky9-cloud-template.md
+docs/vm-inventory.md
+```
+
+Script relacionado con clonación de VMs:
+
+```text
+scripts/clone-rocky9-vm.sh
+```
+
+El script debe usar como base:
+
+```text
+TEMPLATE_ID=200
+```
+
+La carpeta:
+
+```text
+cloud-init/
+```
+
+queda reservada para archivos de Cloud-Init personalizados en fases posteriores. Actualmente la configuración base se gestiona desde Proxmox con opciones como `ciuser`, `sshkeys` e `ipconfig0`.
 
 ---
 
 ## Validaciones realizadas
 
-Validaciones compactas realizadas sobre Ansible:
+Validaciones Ansible realizadas correctamente:
 
 ```bash
 ansible --version | grep "config file"
 ansible-playbook playbooks/site.yml --syntax-check
 ansible-playbook playbooks/site.yml --list-tasks
+ansible-playbook playbooks/site.yml -K
 ```
 
-Estado reportado:
+Validaciones documentadas del template Rocky Linux 9:
 
 ```text
-Sin errores conocidos al momento de documentar este estado.
+Cloud-Init aplicado
+usuario jocufe configurado
+SSH por llave validado
+DHCP funcionando
+QEMU Guest Agent habilitado
+clonado desde template probado
+hostname aplicado en clon
 ```
 
 ---
 
 ## Próximo paso recomendado
 
-El próximo paso recomendado es cerrar la ejecución final de la base Ansible:
-
-```bash
-cd ~/homelab/homelab-infrastructure/ansible
-ansible-playbook playbooks/site.yml -K
-```
-
-Después de una ejecución exitosa, la Fase 3 puede considerarse cerrada en su base inicial.
-
----
-
-## Siguiente fase después de Ansible
-
-Después de cerrar la base Ansible, se debe regresar a:
+El próximo paso recomendado es cerrar la fase del template oficial:
 
 ```text
 Fase 1C — Template Rocky Linux 9 con Cloud-Init
 ```
 
-Pendiente de cerrar:
+Acciones inmediatas:
 
 ```text
-Cloud-Init funcionando
-usuario jocufe configurado
-llave SSH funcionando
-DHCP funcionando
-QEMU Guest Agent funcionando
-clonado de VMs probado
-documentación del proceso actualizada
+1. Confirmar que la documentación usa VMID 200 como template oficial.
+2. Confirmar que no quedan referencias incorrectas a templates no oficiales.
+3. Revisar que scripts/clone-rocky9-vm.sh use TEMPLATE_ID=200.
+4. Validar el script de clonación con una VM de prueba si corresponde.
+5. Actualizar docs/vm-inventory.md con el estado real de las VMs.
+6. Hacer commit de cierre de la fase del template.
 ```
 
 ---
@@ -226,7 +252,7 @@ Hardening avanzado
 Automatización avanzada de creación de VMs
 ```
 
-También queda fuera del alcance actual crear tags únicos para ejecutar tareas individuales. Esa fue una duda puntual y no forma parte del roadmap inmediato.
+También queda fuera del alcance crear tags únicos para ejecutar tareas individuales. Esa fue una duda puntual y no forma parte del roadmap inmediato.
 
 ---
 
