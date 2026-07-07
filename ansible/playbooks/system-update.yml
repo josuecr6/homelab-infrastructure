@@ -4,20 +4,5 @@
   become: true
   gather_facts: false
 
-  tasks:
-    - name: Update all system packages
-      ansible.builtin.dnf:
-        name: "*"
-        state: latest
-      register: system_update_result
-      tags:
-        - system_update
-        - packages
-
-    - name: Show update result
-      ansible.builtin.debug:
-        msg: "System packages were updated."
-      when: system_update_result.changed
-      tags:
-        - system_update
-        - info
+  roles:
+    - system_update
