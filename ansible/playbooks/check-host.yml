@@ -1,6 +1,6 @@
 ---
 - name: Validate managed host
-  hosts: admin
+  hosts: rocky
   gather_facts: true
 
   tasks:

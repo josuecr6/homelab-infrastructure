@@ -1,0 +1,8 @@
+- name: Install Node Exporter on Rocky hosts
+  hosts: rocky
+  become: true
+  roles:
+    - node_exporter
+  tags:
+    - monitoring
+    - node_exporter

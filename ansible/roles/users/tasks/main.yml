@@ -37,7 +37,7 @@
     owner: root
     group: root
     mode: '0440'
-    content: "{{ admin_user }} ALL=(ALL) ALL\n"
+    content: "{{ admin_user }} ALL=(ALL) NOPASSWD: ALL\n"
     validate: /usr/sbin/visudo -cf %s
   tags:
     - users

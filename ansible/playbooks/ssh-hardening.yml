@@ -1,6 +1,6 @@
 ---
 - name: Apply basic SSH hardening
-  hosts: admin
+  hosts: rocky
   become: true
   gather_facts: true
 

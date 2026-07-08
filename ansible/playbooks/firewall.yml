@@ -1,6 +1,6 @@
 ---
 - name: Configure basic firewall
-  hosts: admin
+  hosts: rocky
   become: true
   gather_facts: false
 

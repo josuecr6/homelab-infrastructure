@@ -1,6 +1,6 @@
 ---
 - name: Apply base user configuration to hosts
-  hosts: admin
+  hosts: rocky
   become: true
   gather_facts: true
 
