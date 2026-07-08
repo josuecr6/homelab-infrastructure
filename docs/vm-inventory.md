@@ -14,9 +14,10 @@ Inventario inicial de máquinas virtuales del laboratorio Proxmox.
 
 ## Virtual Machines
 
-| VMID | Nombre | IP | Sistema | Estado | Rol |
-|---|---|---|---|---|---|
-| 201 | admin-01 | 192.168.0.201 | Rocky Linux 9 | Running | Nodo administrador Ansible |
+| VMID | Nombre | IP | Sistema | Estado | Rol | Servicios |
+|---|---|---|---|---|---|---|
+| 201 | admin-01 | 192.168.0.201 | Rocky Linux 9 | Running | Nodo administrador Ansible | Ansible |
+| 202 | monitor-01 | 192.168.0.202 | Rocky Linux 9 | Running | Monitoreo / Observabilidad | Prometheus - Grafana - Node exporter |
 
 ---
 
