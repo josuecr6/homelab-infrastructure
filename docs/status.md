@@ -2,19 +2,17 @@
 
 Este documento resume el estado actual del proyecto **homelab-infrastructure**.
 
-El objetivo es mantener una referencia simple del avance, la fase actual y el próximo paso recomendado.
+Su objetivo es mantener una referencia simple del avance, la fase actual y los próximos pasos del proyecto.
 
 ---
 
 ## Roadmap general
 
-El proyecto sigue este path:
-
 ```text
 Fase 1 — Proxmox / Cloud-Init / templates
 Fase 2 — GitHub como fuente de verdad
 Fase 3 — Ansible local
-Fase 4 — Monitoreo
+Fase 4 — Monitoreo / Observabilidad
 Fase 5 — Red híbrida con Azure
 Fase 6 — Backups híbridos
 ```
@@ -24,14 +22,12 @@ Fase 6 — Backups híbridos
 ## Estado actual resumido
 
 ```text
-Fase 1A — Proxmox base                   avanzada
-Fase 1B — admin-01                       completada en base inicial
-Fase 1C — Template Rocky Cloud-Init      fase actual
-Fase 2  — GitHub / repositorio           iniciado, pendiente de formalizar completamente
-Fase 3  — Ansible base                   completada en base inicial
-Fase 4  — Monitoreo                      pendiente
-Fase 5  — Red híbrida Azure              pendiente
-Fase 6  — Backups Azure                  pendiente
+Fase 1 — Proxmox / Cloud-Init / templates     completada en base inicial
+Fase 2 — GitHub como fuente de verdad         completada en base inicial
+Fase 3 — Ansible local                        completada en base inicial
+Fase 4 — Monitoreo / Observabilidad           en inicio
+Fase 5 — Red híbrida con Azure                pendiente
+Fase 6 — Backups híbridos                     pendiente
 ```
 
 ---
@@ -41,16 +37,50 @@ Fase 6  — Backups Azure                  pendiente
 La fase actual del proyecto es:
 
 ```text
-Fase 1C — Template Rocky Linux 9 con Cloud-Init
+Fase 4 — Monitoreo / Observabilidad
 ```
 
-El objetivo de esta fase es dejar validada y documentada la plantilla oficial Rocky Linux 9 para crear nuevas VMs de forma repetible desde Proxmox.
+Objetivo inicial:
+
+```text
+Implementar una capa básica de monitoreo para observar el estado de las VMs principales del homelab.
+```
+
+Alcance inicial:
+
+```text
+Prometheus
+Grafana
+Node Exporter
+Monitoreo básico de sistema
+Documentación de arquitectura inicial
+```
+
+Fuera del alcance por ahora:
+
+```text
+Alertas avanzadas
+Logs centralizados
+Monitoreo profundo de Proxmox
+Integración con Azure
+Backups de métricas
+```
 
 ---
 
-## Template oficial
+## Infraestructura base actual
 
-El template oficial actual es:
+### Host Proxmox
+
+```text
+Hostname: rdaneel
+IP: 192.168.0.99
+Sistema: Proxmox VE
+Bridge: vmbr0
+Storage: local-lvm
+```
+
+### Template oficial Rocky Linux 9
 
 ```text
 VMID: 200
@@ -63,41 +93,36 @@ Red: DHCP sobre vmbr0
 Usuario Cloud-Init: jocufe
 ```
 
-Este template es la base para clonar nuevas VMs Rocky Linux 9 del laboratorio.
+Este template es la base oficial para crear nuevas VMs Rocky Linux 9 del laboratorio.
 
----
-
-## Nodo administrador
-
-El nodo administrador actual es:
+### Nodo administrador
 
 ```text
-admin-01
-```
-
-Función:
-
-```text
-Nodo desde donde se ejecuta Ansible y se administra la configuración base del homelab.
-```
-
-Usuario administrativo:
-
-```text
-jocufe
+VMID: 201
+Nombre: admin-01
+IP: 192.168.0.201
+Sistema operativo: Rocky Linux 9
+Usuario administrativo: jocufe
+Rol: nodo administrador Ansible
 ```
 
 ---
 
 ## Repositorio
 
-El repositorio local del proyecto se encuentra en:
+Repositorio local:
 
 ```text
 ~/homelab/homelab-infrastructure
 ```
 
-Estructura principal actual:
+Repositorio remoto:
+
+```text
+git@github.com:josuecr6/homelab-infrastructure.git
+```
+
+Estructura principal:
 
 ```text
 homelab-infrastructure/
@@ -109,22 +134,41 @@ homelab-infrastructure/
 └── README.md
 ```
 
+Estado:
+
+```text
+Git actualizado y sincronizado
+Repositorio usado como fuente de verdad del proyecto
+```
+
 ---
 
 ## Ansible
 
-La base inicial de Ansible ya fue completada.
+La base inicial de Ansible está completada.
 
-Se completó:
+Directorio principal:
 
 ```text
-estructura Ansible limpia
-inventario funcional
-roles base creados
-documentación Ansible creada
-validaciones compactas correctas
-ejecución de site.yml aplicada correctamente
-commit de cierre realizado
+~/homelab/homelab-infrastructure/ansible
+```
+
+Archivo de configuración:
+
+```text
+ansible/ansible.cfg
+```
+
+Inventario:
+
+```text
+ansible/inventory/hosts.ini
+```
+
+Variables globales:
+
+```text
+ansible/inventory/group_vars/all/main.yml
 ```
 
 Playbook principal:
@@ -132,15 +176,6 @@ Playbook principal:
 ```text
 ansible/playbooks/site.yml
 ```
-
-Ejecución general:
-
-```bash
-cd ~/homelab/homelab-infrastructure/ansible
-ansible-playbook playbooks/site.yml -K
-```
-
-`-K` usa **K MAYÚSCULA** y solicita la contraseña de `sudo` / `become`.
 
 Roles actuales:
 
@@ -150,6 +185,20 @@ users
 ssh_hardening
 firewall
 system_update
+```
+
+Ejecución general:
+
+```bash
+cd ~/homelab/homelab-infrastructure/ansible
+ansible-playbook playbooks/site.yml -K
+```
+
+Nota:
+
+```text
+-K = K MAYÚSCULA = contraseña de sudo / become
+-k = k minúscula = contraseña SSH
 ```
 
 Documentación Ansible:
@@ -164,7 +213,7 @@ docs/ansible/security-hardening.md
 
 ## Proxmox / Cloud-Init
 
-Documentación relacionada con el template Rocky Linux 9:
+Documentación relacionada:
 
 ```text
 docs/build-rocky9-cloud-template.md
@@ -172,7 +221,7 @@ docs/rocky9-cloud-template.md
 docs/vm-inventory.md
 ```
 
-Script relacionado con clonación de VMs:
+Script de clonación:
 
 ```text
 scripts/clone-rocky9-vm.sh
@@ -184,19 +233,112 @@ El script debe usar como base:
 TEMPLATE_ID=200
 ```
 
+Importante:
+
+```text
+El script de clonación debe ejecutarse desde el host Proxmox, no desde admin-01.
+```
+
+Motivo:
+
+```text
+El comando qm solo existe en Proxmox.
+```
+
 La carpeta:
 
 ```text
 cloud-init/
 ```
 
-queda reservada para archivos de Cloud-Init personalizados en fases posteriores. Actualmente la configuración base se gestiona desde Proxmox con opciones como `ciuser`, `sshkeys` e `ipconfig0`.
+queda reservada para configuraciones Cloud-Init personalizadas futuras.
 
 ---
 
-## Validaciones realizadas
+## Monitoreo / Observabilidad
 
-Validaciones Ansible realizadas correctamente:
+Estado:
+
+```text
+En inicio
+```
+
+Documentación inicial:
+
+```text
+docs/monitoring.md
+```
+
+Arquitectura propuesta:
+
+```text
+Proxmox host
+   |
+   |-- VM 201 admin-01
+   |      |-- node_exporter
+   |
+   |-- VM 202 monitor-01
+          |-- Prometheus
+          |-- Grafana
+          |-- node_exporter
+```
+
+VM propuesta para monitoreo:
+
+```text
+VMID: 202
+Nombre: monitor-01
+Sistema operativo: Rocky Linux 9
+Base: template VMID 200
+Rol: Prometheus + Grafana + Node Exporter
+```
+
+Servicios iniciales:
+
+```text
+Prometheus    puerto 9090
+Grafana       puerto 3000
+Node Exporter puerto 9100
+```
+
+Hosts iniciales a monitorear:
+
+```text
+monitor-01
+admin-01
+```
+
+---
+
+## Validaciones completadas
+
+### Template Rocky Linux 9
+
+```text
+Template oficial VMID 200 validado
+Cloud-Init aplicado
+Usuario jocufe configurado
+SSH por llave validado
+DHCP funcionando
+QEMU Guest Agent habilitado
+Clonado desde template probado
+Hostname aplicado en clon
+admin-01 con machine-id único
+```
+
+### Ansible
+
+```text
+Inventario funcional
+Conexión Ansible validada
+Roles base creados
+Variables globales organizadas
+site.yml validado
+site.yml aplicado correctamente
+Documentación Ansible creada
+```
+
+Comandos usados:
 
 ```bash
 ansible --version | grep "config file"
@@ -205,37 +347,25 @@ ansible-playbook playbooks/site.yml --list-tasks
 ansible-playbook playbooks/site.yml -K
 ```
 
-Validaciones documentadas del template Rocky Linux 9:
-
-```text
-Cloud-Init aplicado
-usuario jocufe configurado
-SSH por llave validado
-DHCP funcionando
-QEMU Guest Agent habilitado
-clonado desde template probado
-hostname aplicado en clon
-```
-
 ---
 
 ## Próximo paso recomendado
 
-El próximo paso recomendado es cerrar la fase del template oficial:
+Continuar con la Fase 4:
 
 ```text
-Fase 1C — Template Rocky Linux 9 con Cloud-Init
+Crear la VM monitor-01 desde el template oficial VMID 200.
 ```
 
 Acciones inmediatas:
 
 ```text
-1. Confirmar que la documentación usa VMID 200 como template oficial.
-2. Confirmar que no quedan referencias incorrectas a templates no oficiales.
-3. Revisar que scripts/clone-rocky9-vm.sh use TEMPLATE_ID=200.
-4. Validar el script de clonación con una VM de prueba si corresponde.
-5. Actualizar docs/vm-inventory.md con el estado real de las VMs.
-6. Hacer commit de cierre de la fase del template.
+1. Corregir docs/monitoring.md para usar VMID 202.
+2. Confirmar cambios de documentación.
+3. Hacer commit del inicio de Fase 4.
+4. Crear monitor-01 desde Proxmox.
+5. Agregar monitor-01 al inventario Ansible.
+6. Preparar roles mínimos para Node Exporter, Prometheus y Grafana.
 ```
 
 ---
@@ -245,19 +375,13 @@ Acciones inmediatas:
 No abrir todavía:
 
 ```text
-Monitoreo con Prometheus/Grafana
 Red híbrida con Azure
 Backups híbridos hacia Azure
 Hardening avanzado
 Automatización avanzada de creación de VMs
+Alertas avanzadas
+Logs centralizados
 ```
 
 También queda fuera del alcance crear tags únicos para ejecutar tareas individuales. Esa fue una duda puntual y no forma parte del roadmap inmediato.
 
----
-
-## Nota de enfoque
-
-El proyecto debe avanzar por fases, evitando desviaciones y evitando agregar mejoras no solicitadas.
-
-Antes de abrir una fase nueva, se debe cerrar el bloque actual con documentación mínima y validación funcional.
