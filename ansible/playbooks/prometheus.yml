@@ -1,0 +1,9 @@
+- name: Install Prometheus on monitoring hosts
+  hosts: monitoring
+  become: true
+  gather_facts: false
+  roles:
+    - prometheus
+  tags:
+    - monitoring
+    - prometheus

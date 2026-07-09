@@ -1,0 +1,120 @@
+---
+- name: Ensure prometheus group exists
+  ansible.builtin.group:
+    name: "{{ prometheus_group }}"
+    system: true
+
+- name: Ensure prometheus user exists
+  ansible.builtin.user:
+    name: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    system: true
+    shell: /sbin/nologin
+    create_home: false
+
+- name: Ensure prometheus directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0755"
+  loop:
+    - /etc/prometheus
+    - /var/lib/prometheus
+
+- name: Download prometheus archive
+  ansible.builtin.get_url:
+    url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}.tar.gz"
+    dest: "/tmp/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}.tar.gz"
+    mode: "0644"
+
+- name: Extract prometheus archive
+  ansible.builtin.unarchive:
+    src: "/tmp/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+
+- name: Install prometheus binary
+  ansible.builtin.copy:
+    src: "/tmp/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}/prometheus"
+    dest: /usr/local/bin/prometheus
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: true
+  notify: Restart prometheus
+
+- name: Install promtool binary
+  ansible.builtin.copy:
+    src: "/tmp/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}/promtool"
+    dest: /usr/local/bin/promtool
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: true
+
+#- name: Install prometheus consoles
+#  ansible.builtin.copy:
+#    src: "/tmp/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}/consoles"
+#    dest: /etc/prometheus/
+#    owner: "{{ prometheus_user }}"
+#    group: "{{ prometheus_group }}"
+#    mode: "0755"
+#    remote_src: true
+#  notify: Restart prometheus
+
+#- name: Install prometheus console libraries
+#  ansible.builtin.copy:
+#    src: "/tmp/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}/console_libraries"
+#    dest: /etc/prometheus/
+#    owner: "{{ prometheus_user }}"
+#    group: "{{ prometheus_group }}"
+#    mode: "0755"
+#    remote_src: true
+#  notify: Restart prometheus
+
+- name: Install prometheus configuration
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0644"
+  notify: Restart prometheus
+
+- name: Install prometheus systemd service
+  ansible.builtin.template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart prometheus
+
+- name: Ensure firewalld packages are installed
+  ansible.builtin.dnf:
+    name:
+      - firewalld
+      - python3-firewall
+    state: present
+
+- name: Ensure firewalld is enabled and running
+  ansible.builtin.systemd:
+    name: firewalld
+    enabled: true
+    state: started
+
+- name: Open prometheus port in firewalld
+  ansible.posix.firewalld:
+    port: "{{ prometheus_port }}/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: Enable and start prometheus
+  ansible.builtin.systemd:
+    name: prometheus
+    enabled: true
+    state: started
+    daemon_reload: true
