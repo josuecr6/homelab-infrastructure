@@ -1,14 +1,12 @@
 # Ansible Roles
 
-Este documento describe cómo está organizada la estructura de roles Ansible en el proyecto **homelab-infrastructure**.
+Este documento describe la organización actual de roles Ansible en el proyecto **homelab-infrastructure**.
 
-El objetivo de usar roles es separar la lógica de configuración por responsabilidad, mantener los playbooks más limpios y facilitar la reutilización de tareas en otros hosts o grupos del homelab.
+El objetivo de usar roles es separar la configuración por responsabilidad, mantener los playbooks simples y facilitar la reutilización en otros hosts del laboratorio.
 
 ---
 
 ## Estructura general
-
-La estructura principal de Ansible se encuentra en:
 
 ```text
 ansible/
@@ -25,38 +23,32 @@ ansible/
 │   ├── ssh-hardening.yml
 │   ├── firewall.yml
 │   ├── system-update.yml
+│   ├── node_exporter.yml
+│   ├── prometheus.yml
+│   ├── grafana.yml
 │   └── site.yml
 └── roles/
     ├── base/
-    │   └── tasks/
-    │       └── main.yml
     ├── users/
-    │   └── tasks/
-    │       └── main.yml
     ├── ssh_hardening/
-    │   ├── tasks/
-    │   │   └── main.yml
-    │   └── handlers/
-    │       └── main.yml
     ├── firewall/
-    │   └── tasks/
-    │       └── main.yml
-    └── system_update/
-        └── tasks/
-            └── main.yml
+    ├── system_update/
+    ├── node_exporter/
+    ├── prometheus/
+    └── grafana/
 ```
 
 ---
 
 ## Configuración de Ansible
 
-El archivo principal de configuración está en:
+Archivo principal:
 
 ```text
 ansible/ansible.cfg
 ```
 
-Contenido esperado:
+Configuración base esperada:
 
 ```ini
 [defaults]
@@ -67,184 +59,47 @@ retry_files_enabled = False
 interpreter_python = auto_silent
 ```
 
-La línea más importante para roles es:
+La opción:
 
 ```ini
 roles_path = roles
 ```
 
-Esto indica que Ansible debe buscar roles dentro de:
-
-```text
-ansible/roles/
-```
-
-Sin esta línea, al ejecutar playbooks desde `ansible/playbooks/`, Ansible puede intentar buscar roles en una ruta incorrecta como:
-
-```text
-ansible/playbooks/roles/
-```
+indica que los roles se buscan dentro de `ansible/roles/`.
 
 ---
 
 ## Inventario
 
-El inventario actual está en:
+Archivo:
 
 ```text
 ansible/inventory/hosts.ini
 ```
 
-Ejemplo actual:
-
-```ini
-[admin]
-admin-01 ansible_host=192.168.0.201 ansible_user=jocufe ansible_ssh_private_key_file=~/.ssh/ansible_admin01
-```
-
-El grupo principal usado hasta ahora es:
+Grupos principales:
 
 ```text
 admin
+monitoring
 ```
 
-El host actual administrado es:
+Hosts actuales:
 
-```text
-admin-01
-```
+| Grupo | Host | IP | Rol |
+|---|---|---:|---|
+| admin | admin-01 | 192.168.0.201 | Nodo administrador Ansible |
+| monitoring | monitor-01 | 192.168.0.202 | Nodo de monitoreo |
 
----
-
-## Variables globales
-
-Las variables globales están en:
+Las variables compartidas para sistemas Rocky Linux y los roles se mantienen en:
 
 ```text
 ansible/inventory/group_vars/all/main.yml
 ```
 
-Este archivo contiene variables compartidas por los roles.
-
-Ejemplos:
-
-```yaml
-admin_user: jocufe
-admin_user_groups:
-  - wheel
-admin_user_shell: /bin/bash
-admin_ssh_public_key: "ssh-ed25519 ... ansible admin-01 local"
-
-ssh_permit_root_login: "no"
-ssh_pubkey_authentication: "yes"
-ssh_password_authentication: "no"
-
-firewall_allowed_services:
-  - ssh
-```
-
-Estas variables permiten que los roles no tengan valores quemados directamente en las tareas.
-
 ---
 
-## Playbooks principales
-
-Los playbooks se encuentran en:
-
-```text
-ansible/playbooks/
-```
-
-Cada playbook principal llama a un rol.
-
-### `base-rocky.yml`
-
-Ejecuta el rol `base`.
-
-```yaml
----
-- name: Apply base Rocky Linux configuration
-  hosts: admin
-  become: true
-  gather_facts: true
-
-  roles:
-    - base
-```
-
-Este playbook mantiene `gather_facts: true` porque el rol `base` usa facts como:
-
-```text
-ansible_distribution
-ansible_distribution_version
-ansible_hostname
-```
-
-### `users.yml`
-
-Ejecuta el rol `users`.
-
-```yaml
----
-- name: Apply base user configuration
-  hosts: admin
-  become: true
-  gather_facts: false
-
-  roles:
-    - users
-```
-
-### `ssh-hardening.yml`
-
-Ejecuta el rol `ssh_hardening`.
-
-```yaml
----
-- name: Apply basic SSH hardening
-  hosts: admin
-  become: true
-  gather_facts: false
-
-  roles:
-    - ssh_hardening
-```
-
-### `firewall.yml`
-
-Ejecuta el rol `firewall`.
-
-```yaml
----
-- name: Configure basic firewall
-  hosts: admin
-  become: true
-  gather_facts: false
-
-  roles:
-    - firewall
-```
-
-### `system-update.yml`
-
-Ejecuta el rol `system_update`.
-
-```yaml
----
-- name: Update Rocky Linux systems
-  hosts: admin
-  become: true
-  gather_facts: false
-
-  roles:
-    - system_update
-```
-
----
-
-## Playbook principal `site.yml`
-
-El playbook `site.yml` es el punto de entrada general.
+## Playbook principal
 
 Archivo:
 
@@ -252,7 +107,7 @@ Archivo:
 ansible/playbooks/site.yml
 ```
 
-Contenido actual:
+Importaciones actuales:
 
 ```yaml
 ---
@@ -261,248 +116,188 @@ Contenido actual:
 - import_playbook: ssh-hardening.yml
 - import_playbook: firewall.yml
 - import_playbook: system-update.yml
+- import_playbook: node_exporter.yml
+- import_playbook: prometheus.yml
+- import_playbook: grafana.yml
 ```
 
-Este archivo permite ejecutar toda la configuración base del host usando un solo comando.
+Ejecución general desde `admin-01`:
+
+```bash
+cd ~/homelab/homelab-infrastructure/ansible
+ansible-playbook playbooks/site.yml -K
+```
+
+`-K` usa **K MAYÚSCULA** y solicita la contraseña de `sudo` / `become`.
 
 ---
 
 ## Roles actuales
 
-### Rol `base`
+### `base`
 
-Ruta:
+Responsabilidades:
 
-```text
-ansible/roles/base/
-```
+- validar Rocky Linux;
+- mostrar información básica del host;
+- instalar paquetes base;
+- habilitar servicios base como `chronyd` y QEMU Guest Agent.
 
-Responsabilidad:
-
-* Validar que el sistema sea Rocky Linux.
-* Mostrar información básica del host.
-* Instalar paquetes base.
-* Habilitar e iniciar `chronyd`.
-* Habilitar e iniciar `qemu-guest-agent`.
-
-Tareas principales:
-
-```text
-roles/base/tasks/main.yml
-```
-
-Tags usados:
+Tag principal:
 
 ```text
 base
-validation
-info
-packages
-services
-chrony
-qemu
 ```
 
----
+### `users`
 
-### Rol `users`
+Responsabilidades:
 
-Ruta:
+- crear o asegurar el usuario administrativo `jocufe`;
+- configurar el grupo `wheel`;
+- instalar la llave pública SSH;
+- administrar el archivo de sudoers.
 
-```text
-ansible/roles/users/
-```
-
-Responsabilidad:
-
-* Crear o asegurar el usuario administrador.
-* Configurar directorio `.ssh`.
-* Instalar llave pública SSH.
-* Configurar sudoers con validación usando `visudo`.
-
-Tareas principales:
-
-```text
-roles/users/tasks/main.yml
-```
-
-Tags usados:
+Tag principal:
 
 ```text
 users
-accounts
-ssh_keys
-sudoers
 ```
 
----
+### `ssh_hardening`
 
-### Rol `ssh_hardening`
+Responsabilidades:
 
-Ruta:
+- crear el drop-in `/etc/ssh/sshd_config.d/99-homelab.conf`;
+- impedir acceso SSH directo de root;
+- habilitar autenticación por llave;
+- deshabilitar autenticación por contraseña;
+- validar y recargar `sshd` mediante un handler.
 
-```text
-ansible/roles/ssh_hardening/
-```
-
-Responsabilidad:
-
-* Configurar un drop-in SSH en:
-
-```text
-/etc/ssh/sshd_config.d/99-homelab.conf
-```
-
-* Aplicar valores como:
-
-```text
-PermitRootLogin no
-PubkeyAuthentication yes
-PasswordAuthentication no
-```
-
-* Validar la configuración de SSH antes de recargar el servicio.
-
-Archivos principales:
-
-```text
-roles/ssh_hardening/tasks/main.yml
-roles/ssh_hardening/handlers/main.yml
-```
-
-Flujo del handler:
-
-```text
-copy cambia archivo
-  -> notify Reload sshd
-    -> validar sshd con /usr/sbin/sshd -t
-      -> si pasa, recargar sshd
-```
-
-Tags usados:
+Tag principal:
 
 ```text
 ssh
-ssh_hardening
 ```
 
-Nota importante:
+### `firewall`
 
-Antes de aplicar cambios de SSH, mantener una sesión SSH abierta por seguridad.
+Responsabilidades:
 
----
+- instalar y habilitar `firewalld`;
+- permitir servicios y puertos definidos por variables;
+- aplicar reglas permanentes e inmediatas.
 
-### Rol `firewall`
-
-Ruta:
-
-```text
-ansible/roles/firewall/
-```
-
-Responsabilidad:
-
-* Instalar `firewalld`.
-* Habilitar e iniciar `firewalld`.
-* Permitir servicios definidos en:
-
-```yaml
-firewall_allowed_services:
-  - ssh
-```
-
-Tareas principales:
-
-```text
-roles/firewall/tasks/main.yml
-```
-
-Módulo usado:
-
-```text
-ansible.posix.firewalld
-```
-
-Opciones usadas:
-
-```yaml
-permanent: true
-immediate: true
-state: enabled
-```
-
-Tags usados:
+Tag principal:
 
 ```text
 firewall
-packages
-services
-firewall_rules
+```
+
+### `system_update`
+
+Responsabilidades:
+
+- actualizar paquetes mediante DNF;
+- registrar el resultado de la actualización;
+- informar cuando se aplican cambios.
+
+Tag principal:
+
+```text
+system_update
+```
+
+### `node_exporter`
+
+Responsabilidades:
+
+- crear el usuario y grupo de servicio;
+- instalar el binario de Node Exporter;
+- crear y habilitar el servicio systemd;
+- permitir el puerto `9100/tcp`;
+- exponer métricas básicas del sistema.
+
+Hosts actuales:
+
+```text
+admin-01
+monitor-01
+```
+
+Tag principal:
+
+```text
+node_exporter
+```
+
+### `prometheus`
+
+Responsabilidades:
+
+- instalar Prometheus y `promtool`;
+- administrar la configuración y targets;
+- crear y habilitar el servicio systemd;
+- permitir el puerto `9090/tcp`.
+
+Host actual:
+
+```text
+monitor-01
+```
+
+Tag principal:
+
+```text
+prometheus
+```
+
+### `grafana`
+
+Responsabilidades:
+
+- instalar Grafana;
+- habilitar e iniciar `grafana-server`;
+- permitir el puerto `3000/tcp`;
+- dejar disponible la interfaz para configurar Prometheus y dashboards.
+
+Host actual:
+
+```text
+monitor-01
+```
+
+Tag principal:
+
+```text
+grafana
 ```
 
 ---
 
-### Rol `system_update`
+## Relación entre roles y hosts
 
-Ruta:
+| Rol | admin-01 | monitor-01 |
+|---|:---:|:---:|
+| base | Sí | Sí |
+| users | Sí | Sí |
+| ssh_hardening | Sí | Sí |
+| firewall | Sí | Sí |
+| system_update | Sí | Sí |
+| node_exporter | Sí | Sí |
+| prometheus | No | Sí |
+| grafana | No | Sí |
 
-```text
-ansible/roles/system_update/
-```
-
-Responsabilidad:
-
-* Actualizar paquetes del sistema.
-* Registrar el resultado de la actualización.
-* Mostrar mensaje solo si hubo cambios.
-
-Tareas principales:
-
-```text
-roles/system_update/tasks/main.yml
-```
-
-Conceptos usados:
-
-```yaml
-register: system_update_result
-when: system_update_result.changed
-```
-
-Tags usados:
-
-```text
-system_update
-packages
-info
-```
+La aplicación exacta depende de los grupos definidos en cada playbook.
 
 ---
 
 ## Comandos frecuentes
 
-Entrar al directorio Ansible:
-
-```bash
-cd ~/homelab/homelab-infrastructure/ansible
-```
-
-Validar qué configuración está usando Ansible:
-
-```bash
-ansible --version | grep "config file"
-```
-
-Validar sintaxis de todo el sitio:
+Validar sintaxis:
 
 ```bash
 ansible-playbook playbooks/site.yml --syntax-check
-```
-
-Listar tags:
-
-```bash
-ansible-playbook playbooks/site.yml --list-tags
 ```
 
 Listar tareas:
@@ -511,68 +306,39 @@ Listar tareas:
 ansible-playbook playbooks/site.yml --list-tasks
 ```
 
-Listar tareas de un tag específico:
+Listar tags:
 
 ```bash
-ansible-playbook playbooks/site.yml --tags firewall --list-tasks
+ansible-playbook playbooks/site.yml --list-tags
 ```
 
-Ejecutar todo el sitio:
+Ejecutar toda la configuración:
 
 ```bash
 ansible-playbook playbooks/site.yml -K
 ```
 
-Ejecutar solo un tag:
+Limitar la ejecución a un grupo:
 
 ```bash
-ansible-playbook playbooks/site.yml -K --tags firewall
+ansible-playbook playbooks/site.yml -K --limit monitoring
 ```
 
-Ejecutar un playbook específico:
+Ejecutar un rol mediante su tag principal:
 
 ```bash
-ansible-playbook playbooks/firewall.yml -K
+ansible-playbook playbooks/site.yml -K --tags prometheus
 ```
 
-Ejecutar un tag desde un playbook específico:
-
-```bash
-ansible-playbook playbooks/firewall.yml -K --tags firewall
-```
+Los tags se usan para ejecutar bloques funcionales existentes. No forma parte del alcance actual crear tags únicos para ejecutar tareas individuales.
 
 ---
 
-## Ejecución por tags
-
-Los tags permiten ejecutar solo una parte del playbook.
-
-Ejemplo:
-
-```bash
-ansible-playbook playbooks/site.yml -K --tags firewall
-```
-
-Esto ejecuta todas las tareas que tengan el tag:
+## Estado de la estructura
 
 ```text
-firewall
+Roles base: completados
+Roles de monitoreo: completados en alcance básico
+Integración en site.yml: completada
+Documentación: actualizada al cierre de la Fase 4
 ```
-
-Si varias tareas tienen el mismo tag, todas se ejecutan.
-
-Ejemplo en el rol `firewall`:
-
-```text
-firewall : Install firewalld
-firewall : Enable and start firewalld
-firewall : Allow configured firewall services
-```
-
-Todas pueden ejecutarse con:
-
-```bash
-ansible-playbook playbooks/site.yml -K --tags firewall
-```
-
----
