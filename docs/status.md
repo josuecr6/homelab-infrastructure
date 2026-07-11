@@ -25,7 +25,7 @@ Fase 6 — Backups híbridos
 Fase 1 — Proxmox / Cloud-Init / templates     completada en base inicial
 Fase 2 — GitHub como fuente de verdad         completada en base inicial
 Fase 3 — Ansible local                        completada en base inicial
-Fase 4 — Monitoreo / Observabilidad           en inicio
+Fase 4 — Monitoreo / Observabilidad           en progreso avanzado
 Fase 5 — Red híbrida con Azure                pendiente
 Fase 6 — Backups híbridos                     pendiente
 ```

@@ -36,3 +36,27 @@ Proxmox host
           |-- Prometheus
           |-- Grafana
           |-- node_exporter
+
+## Estado actual
+
+La Fase 4 — Monitoreo / Observabilidad cuenta con un stack básico funcional compuesto por:
+
+- Prometheus
+- Grafana
+- Node Exporter
+
+### Servicios desplegados
+
+| Servicio | Host | IP | Puerto | Estado |
+|---|---|---:|---:|---|
+| Node Exporter | admin-01 | 192.168.0.201 | 9100 | Funcionando |
+| Node Exporter | monitor-01 | 192.168.0.202 | 9100 | Funcionando |
+| Prometheus | monitor-01 | 192.168.0.202 | 9090 | Funcionando |
+| Grafana | monitor-01 | 192.168.0.202 | 3000 | Funcionando |
+
+### Accesos
+
+Prometheus:
+
+```text
+http://192.168.0.202:9090

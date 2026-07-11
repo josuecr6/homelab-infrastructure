@@ -1,0 +1,9 @@
+- name: Install Grafana on monitoring hosts
+  hosts: monitoring
+  become: true
+  gather_facts: false
+  roles:
+    - grafana
+  tags:
+    - monitoring
+    - grafana
